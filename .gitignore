@@ -1,0 +1,16 @@
+# Arquivos e pastas do Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+
+# Variáveis de ambiente e credenciais
+.env
+.env.*
+
+# Configurações locais de editores
+.vscode/
+.idea/
+
+# Logs
+*.log
