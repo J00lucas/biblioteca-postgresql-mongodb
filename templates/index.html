@@ -212,7 +212,7 @@
     await carregarLivrosDoBanco();
     await carregarUsuariosDoBanco();
 
-    renderizarLogs();
+    await carregarLogsDoBanco();
     lucide.createIcons();
 });
 
@@ -278,13 +278,6 @@
     }
 
     usuarios.push(dados);
-
-    adicionarLog(
-      "USUARIO_CADASTRADO",
-      `Leitor '${dados.nome}' registrado.`,
-      dados.id,
-      null
-    );
 
     renderizarUsuarios(usuarios);
     fecharModalUsuario();
@@ -359,13 +352,6 @@
       throw new Error(dados.erro || "Erro ao realizar empréstimo.");
     }
 
-    adicionarLog(
-      "EMPRESTIMO_SUCESSO",
-      `Empréstimo do livro ID ${idLivro} realizado.`,
-      idUsuario,
-      idLivro
-    );
-
     await carregarLivrosDoBanco();
 
     fecharModalEmprestimo();
@@ -378,17 +364,28 @@
   }
 }
 
-    function adicionarLog(tipo, detalhes, idUsuario, idLivro) {
-      logs.unshift({
-        id: '65b_' + Math.random().toString(16).substr(2, 6),
-        tipo_evento: tipo,
-        detalhes: detalhes,
-        id_usuario: idUsuario,
-        id_livro: idLivro,
-        data: new Date().toLocaleTimeString()
-      });
-      renderizarLogs();
-    }
+    async function carregarLogsDoBanco() {
+  try {
+    const resposta = await fetch("/api/logs");
+    const dados = await resposta.json();
+
+    logs = dados.map(log => ({
+      id: 'mongo_' + Math.random().toString(16).substr(2, 6),
+      tipo_evento: log.tipo_evento,
+      detalhes: log.detalhes,
+      id_usuario: log.id_usuario,
+      id_livro: log.id_livro,
+      data: log.timestamp
+        ? new Date(log.timestamp).toLocaleString("pt-BR")
+        : "Sem data"
+    }));
+
+    renderizarLogs();
+
+  } catch (erro) {
+    console.error("Erro ao carregar logs do MongoDB:", erro);
+  }
+}
 
     function renderizarLogs() {
       const container = document.getElementById("containerLogs");

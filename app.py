@@ -1,7 +1,11 @@
 from flask import Flask, render_template, jsonify, request
 import psycopg2
+import os
+from dotenv import load_dotenv
 from pymongo import MongoClient
 from datetime import datetime
+
+load_dotenv()
 
 app = Flask(__name__)
 
@@ -11,7 +15,7 @@ def conectar_postgresql():
         port=5432,
         dbname="biblioteca",
         user="postgres",
-        password="P@t06188"
+        password=os.getenv("DB_PASSWORD")
     )
 
 mongo_client = MongoClient("mongodb://localhost:27017/")
@@ -26,7 +30,7 @@ def registrar_evento_nosql(tipo_evento, detalhes, id_usuario=None, id_livro=None
         "id_usuario": id_usuario,
         "id_livro": id_livro
     }
-
+    print("REGISTRANDO EVENTO NO MONGODB:", evento)
     mongo_collection.insert_one(evento)
 
 
@@ -132,6 +136,12 @@ def cadastrar_usuario():
         id_usuario = cursor.fetchone()[0]
 
         conn.commit()
+
+        registrar_evento_nosql(
+        "USUARIO_CADASTRADO",
+        f"Usuário {nome} cadastrado com sucesso.",
+        id_usuario
+        )
 
         return jsonify({
             "mensagem": "Usuário cadastrado com sucesso.",
@@ -250,16 +260,15 @@ def listar_logs():
     resultado = []
 
     for evento in eventos:
-
         data_evento = evento.get("timestamp") or evento.get("data_evento")
 
-    resultado.append({
-    "tipo_evento": evento.get("tipo_evento"),
-    "detalhes": evento.get("detalhes"),
-    "id_usuario": evento.get("id_usuario"),
-    "id_livro": evento.get("id_livro"),
-    "timestamp": data_evento.isoformat() if data_evento else None
-})
+        resultado.append({
+            "tipo_evento": evento.get("tipo_evento"),
+            "detalhes": evento.get("detalhes"),
+            "id_usuario": evento.get("id_usuario"),
+            "id_livro": evento.get("id_livro"),
+            "timestamp": data_evento.isoformat() if data_evento else None
+        })
 
     return jsonify(resultado)
 
