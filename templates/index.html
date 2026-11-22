@@ -1,424 +1,703 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-BR" class="dark">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Sistema de Biblioteca - Integrado</title>
-  <!-- Tailwind CSS -->
+  <title>Biblioteca Central • Gestão do Acervo</title>
+
   <script src="https://cdn.tailwindcss.com"></script>
-  <!-- Lucide Icons -->
   <script src="https://unpkg.com/lucide@latest"></script>
+
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
-<body class="bg-slate-100 text-slate-800 font-sans min-h-screen">
 
-  <!-- Header -->
-  <header class="bg-indigo-900 text-white shadow-lg sticky top-0 z-40">
-    <div class="max-w-7xl mx-auto px-4 py-4 flex flex-col md:flex-row items-center justify-between gap-4">
-      <div class="flex items-center gap-3">
-        <i data-lucide="book-open-check" class="w-8 h-8 text-amber-400"></i>
-        <div>
-          <h1 class="text-xl font-bold tracking-wide">Biblioteca Integrada</h1>
-          <p class="text-xs text-indigo-300">PostgreSQL • MongoDB • Python • PHP</p>
-        </div>
+<body>
+
+<div class="app-shell">
+
+  <aside class="sidebar">
+
+    <div class="brand">
+      <div class="brand-mark">
+        <i data-lucide="library-big"></i>
       </div>
 
-      <!-- Barra de Busca Instantânea (Sem Scroll) -->
-      <div class="relative w-full md:w-96">
-        <input 
-          type="text" 
-          id="campoBusca" 
-          placeholder="Buscar livro por título, autor ou ID..." 
-          oninput="filtrarLivros()"
-          class="w-full pl-10 pr-4 py-2 rounded-lg bg-indigo-800 text-white placeholder-indigo-300 focus:outline-none focus:ring-2 focus:ring-amber-400 text-sm"
-        >
-        <i data-lucide="search" class="w-4 h-4 text-indigo-300 absolute left-3 top-3"></i>
+      <div>
+        <h1>Biblioteca</h1>
+        <p>Central de Leitura</p>
       </div>
-
-      <button onclick="abrirModalUsuario()" class="px-4 py-2 bg-amber-500 hover:bg-amber-600 text-indigo-950 font-semibold rounded-lg text-sm flex items-center gap-2 shadow transition">
-        <i data-lucide="user-plus" class="w-4 h-4"></i> Novo Leitor
-      </button>
-    </div>
-  </header>
-
-  <!-- Conteúdo Principal -->
-  <main class="max-w-7xl mx-auto px-4 py-6">
-    
-    <!-- Abas -->
-    <div class="flex border-b border-slate-300 mb-6 gap-6">
-      <button id="tab-catalogo" onclick="alternarAba('catalogo')" class="pb-2 border-b-2 border-indigo-600 font-bold text-indigo-600 text-sm flex items-center gap-2">
-        <i data-lucide="book-marked" class="w-4 h-4"></i> Catálogo de Livros
-      </button>
-      <button id="tab-usuarios" onclick="alternarAba('usuarios')" class="pb-2 border-b-2 border-transparent text-slate-500 hover:text-indigo-600 text-sm flex items-center gap-2">
-        <i data-lucide="users" class="w-4 h-4"></i> Leitores Cadastrados
-      </button>
-      <button id="tab-logs" onclick="alternarAba('logs')" class="pb-2 border-b-2 border-transparent text-slate-500 hover:text-indigo-600 text-sm flex items-center gap-2">
-        <i data-lucide="database" class="w-4 h-4"></i> Auditoria NoSQL (MongoDB)
-      </button>
     </div>
 
-    <!-- SEÇÃO 1: CATÁLOGO -->
-    <section id="sec-catalogo">
-      <div id="gridLivros" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6"></div>
-      <div id="semResultados" class="hidden text-center py-16 text-slate-500">
-        <i data-lucide="search-x" class="w-12 h-12 mx-auto mb-2 opacity-40"></i>
-        <p class="text-base font-medium">Nenhum livro encontrado.</p>
-      </div>
-    </section>
+    <nav class="nav">
 
-    <!-- SEÇÃO 2: USUÁRIOS -->
-    <section id="sec-usuarios" class="hidden">
-      <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
-        <div class="p-4 border-b border-slate-200 bg-slate-50 flex justify-between items-center">
-          <h2 class="font-bold text-slate-700">Lista de Leitores (PostgreSQL)</h2>
-          <input type="text" id="buscaUsuarioInput" oninput="filtrarUsuarios()" placeholder="Filtrar leitor..." class="px-3 py-1.5 border rounded-lg text-sm w-64">
+      <button id="tab-catalogo" class="active" onclick="alternarAba('catalogo')">
+        <i data-lucide="book-open"></i>
+        <span>Catálogo</span>
+      </button>
+
+      <button id="tab-disponiveis" onclick="alternarAba('disponiveis')">
+        <i data-lucide="book-check"></i>
+        <span>Disponíveis</span>
+      </button>
+
+      <button id="tab-usuarios" onclick="alternarAba('usuarios')">
+        <i data-lucide="users"></i>
+        <span>Leitores</span>
+      </button>
+
+      <button id="tab-transacoes" onclick="alternarAba('transacoes')">
+        <i data-lucide="repeat-2"></i>
+        <span>Empréstimos</span>
+      </button>
+
+      <button id="tab-logs" onclick="alternarAba('logs')">
+        <i data-lucide="scroll-text"></i>
+        <span>Auditoria</span>
+      </button>
+
+      <button id="tab-backups" onclick="alternarAba('backups')">
+        <i data-lucide="database-backup"></i>
+        <span>Backups</span>
+      </button>
+
+    </nav>
+
+    <div class="sidebar-bottom">
+      <button class="theme-btn" onclick="alternarDarkMode()">
+        <i id="iconeTema" data-lucide="sun"></i>
+        <span class="label">Alternar tema</span>
+      </button>
+    </div>
+
+  </aside>
+
+  <main class="main">
+
+    <header class="topbar">
+
+      <div>
+        <div class="eyebrow">Sistema integrado</div>
+        <h2 id="pageTitle">Catálogo geral</h2>
+      </div>
+
+      <div class="top-actions">
+
+        <button class="secondary-btn" onclick="abrirModalUsuario()">
+          <i data-lucide="user-plus"></i>
+          Novo leitor
+        </button>
+
+        <button class="primary-btn" onclick="abrirModalLivro()">
+          <i data-lucide="plus"></i>
+          Novo livro
+        </button>
+
+      </div>
+
+    </header>
+
+    <div class="content">
+
+      <section class="hero">
+
+        <div class="hero-card hero-main">
+
+          <div class="eyebrow" style="color:#e2bc70">
+            Biblioteca Central • Gestão interna
+          </div>
+
+          <div class="gold-line"></div>
+
+          <h3>Biblioteca Central</h3>
+
+          <p>
+            Sistema de gestão da biblioteca
+          </p>
+
         </div>
-        <table class="w-full text-left text-sm">
-          <thead class="bg-slate-100 text-slate-600 border-b">
-            <tr>
-              <th class="p-3">ID</th>
-              <th class="p-3">Nome</th>
-              <th class="p-3">CPF</th>
-              <th class="p-3">E-mail</th>
-              <th class="p-3">Telefone</th>
-            </tr>
-          </thead>
-          <tbody id="tabelaUsuarios"></tbody>
-        </table>
-      </div>
-    </section>
 
-    <!-- SEÇÃO 3: LOGS -->
-    <section id="sec-logs" class="hidden">
-      <div class="bg-slate-900 text-emerald-400 p-5 rounded-xl font-mono text-sm shadow-inner max-h-[500px] overflow-y-auto">
-        <div class="text-xs text-slate-400 pb-3 border-b border-slate-800 mb-3">Coleção: eventos_sistema (MongoDB)</div>
-        <div id="containerLogs" class="space-y-3"></div>
-      </div>
-    </section>
+        <div class="stats">
+
+          <div class="stat">
+            <span>Livros</span>
+            <strong id="statLivros">—</strong>
+          </div>
+
+          <div class="stat">
+            <span>Disponíveis</span>
+            <strong id="statDisponiveis">—</strong>
+          </div>
+
+          <div class="stat">
+            <span>Leitores</span>
+            <strong id="statUsuarios">—</strong>
+          </div>
+
+          <div class="stat">
+            <span>Eventos</span>
+            <strong id="statLogs">—</strong>
+          </div>
+
+        </div>
+
+      </section>
+
+      <section id="sec-catalogo" class="section">
+
+        <div class="section-head">
+
+          <div>
+            <h3 class="section-title">Catálogo geral</h3>
+
+            <p class="section-sub">
+              Cadastro, estoque e manutenção dos títulos da biblioteca.
+            </p>
+          </div>
+
+          <div class="toolbar">
+
+            <div class="search">
+              <i data-lucide="search"></i>
+
+              <input
+                id="campoBuscaCatalogo"
+                oninput="filtrarCatalogo()"
+                placeholder="Buscar por título, autor ou ID...">
+
+            </div>
+
+          </div>
+
+        </div>
+
+        <div id="gridCatalogo" class="book-grid"></div>
+
+      </section>
+
+      <section id="sec-disponiveis" class="section hidden">
+
+        <div class="section-head">
+
+          <div>
+            <h3 class="section-title">
+              Disponíveis para empréstimo
+            </h3>
+
+            <p class="section-sub">
+              Visão rápida dos exemplares liberados para empréstimo.
+            </p>
+          </div>
+
+          <div class="search">
+
+            <i data-lucide="search"></i>
+
+            <input
+              id="campoBuscaDisponiveis"
+              oninput="filtrarDisponiveis()"
+              placeholder="Buscar título ou autor...">
+
+          </div>
+
+        </div>
+
+        <div id="gridDisponiveis" class="book-grid"></div>
+
+      </section>
+
+      <section id="sec-usuarios" class="section hidden">
+
+        <div class="section-head">
+
+          <div>
+            <h3 class="section-title">
+              Leitores cadastrados
+            </h3>
+
+            <p class="section-sub">
+              Cadastro e consulta dos leitores autorizados a utilizar o acervo.
+            </p>
+          </div>
+
+          <div class="toolbar">
+
+            <div class="search">
+
+              <i data-lucide="search"></i>
+
+              <input
+                id="buscaUsuarioInput"
+                oninput="filtrarUsuarios()"
+                placeholder="Buscar nome ou CPF...">
+
+            </div>
+
+            <button
+              class="primary-btn"
+              onclick="abrirModalUsuario()">
+
+              <i data-lucide="user-plus"></i>
+              Cadastrar leitor
+
+            </button>
+
+          </div>
+
+        </div>
+
+        <div class="panel table-wrap">
+
+          <table>
+
+            <thead>
+
+              <tr>
+                <th>ID</th>
+                <th>Nome</th>
+                <th>CPF</th>
+                <th>E-mail</th>
+                <th>Telefone</th>
+              </tr>
+
+            </thead>
+
+            <tbody id="tabelaUsuarios"></tbody>
+
+          </table>
+
+        </div>
+
+      </section>
+
+      <section id="sec-transacoes" class="section hidden">
+
+        <div class="section-head">
+
+          <div>
+            <h3 class="section-title">
+              Movimentação do acervo
+            </h3>
+
+            <p class="section-sub">
+              Controle retiradas, prazos e devoluções do acervo.
+            </p>
+          </div>
+
+        </div>
+
+        <div class="transaction-grid">
+
+          <div class="transaction-card">
+
+            <h3>Novo empréstimo</h3>
+
+            <p>
+              Selecione o leitor e o livro que será retirado.
+            </p>
+
+            <div class="stack">
+
+              <div class="field">
+
+                <label>Buscar leitor</label>
+
+                <input
+                  id="buscaLeitorEmp"
+                  oninput="filtrarLeitoresEmp()"
+                  placeholder="Digite nome ou CPF">
+
+              </div>
+
+              <div class="field">
+
+                <label>Leitor</label>
+
+                <select id="selectLeitorEmp"></select>
+
+              </div>
+
+              <div class="field">
+
+                <label>Livro disponível</label>
+
+                <select id="selectLivroEmp"></select>
+
+              </div>
+
+              <button
+                class="primary-btn full"
+                onclick="efetuarEmprestimoLeitor()">
+
+                <i data-lucide="book-up-2"></i>
+                Confirmar empréstimo
+
+              </button>
+
+            </div>
+
+          </div>
+
+          <div class="transaction-card">
+
+            <h3>Registrar devolução</h3>
+
+            <p>
+              Consulte os livros pendentes de um leitor.
+            </p>
+
+            <div class="stack">
+
+              <div class="field">
+
+                <label>Buscar leitor</label>
+
+                <input
+                  id="buscaLeitorDev"
+                  oninput="filtrarLeitoresDev()"
+                  placeholder="Digite nome ou CPF">
+
+              </div>
+
+              <div class="field">
+
+                <label>Leitor</label>
+
+                <select
+                  id="selectLeitorDev"
+                  onchange="carregarLivrosPendentesLeitor()">
+                </select>
+
+              </div>
+
+              <div class="field">
+
+                <label>Livro pendente</label>
+
+                <select id="selectLivroDev"></select>
+
+              </div>
+
+              <button
+                class="primary-btn full"
+                onclick="efetuarDevolucaoLeitor()">
+
+                <i data-lucide="book-down"></i>
+                Confirmar devolução
+
+              </button>
+
+            </div>
+
+          </div>
+
+        </div>
+
+      </section>
+
+      <section id="sec-logs" class="section hidden">
+
+        <div class="section-head">
+
+          <div>
+
+            <h3 class="section-title">
+              Auditoria do sistema
+            </h3>
+
+            <p class="section-sub">
+              Rastreabilidade das operações realizadas no sistema.
+            </p>
+
+          </div>
+
+        </div>
+
+        <div id="containerLogs" class="log-list"></div>
+
+      </section>
+
+      <section id="sec-backups" class="section hidden">
+
+        <div class="section-head">
+
+          <div>
+
+            <h3 class="section-title">
+              Backup do banco de dados
+            </h3>
+
+            <p class="section-sub">
+              Crie e consulte cópias de segurança do banco PostgreSQL.
+            </p>
+
+          </div>
+
+          <button
+            id="btnCriarBackup"
+            class="primary-btn"
+            onclick="criarBackup()">
+
+            <i data-lucide="database-backup"></i>
+            Criar backup agora
+
+          </button>
+
+        </div>
+
+        <div class="panel">
+
+          <div class="backup-header">
+
+            <div>
+              <strong>Backups realizados</strong>
+
+              <p>
+                Os arquivos são armazenados na pasta de backups do sistema.
+              </p>
+            </div>
+
+            <button
+              class="secondary-btn"
+              onclick="carregarBackups()">
+
+              <i data-lucide="refresh-cw"></i>
+              Atualizar
+
+            </button>
+
+          </div>
+
+          <div id="listaBackups" class="backup-list"></div>
+
+        </div>
+
+      </section>
+
+    </div>
 
   </main>
 
-  <!-- MODAL NOVO LEITOR -->
-  <div id="modalUsuario" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm hidden flex items-center justify-center p-4 z-50">
-    <div class="bg-white rounded-xl max-w-md w-full p-6 shadow-2xl">
-      <h3 class="text-lg font-bold text-indigo-900 mb-4">Cadastrar Novo Leitor</h3>
-      <form onsubmit="salvarUsuario(event)" class="space-y-4">
-        <div>
-          <label class="block text-xs font-bold text-slate-600 mb-1">Nome Completo</label>
-          <input type="text" id="cadNome" required class="w-full p-2.5 border rounded-lg text-sm">
-        </div>
-        <div>
-          <label class="block text-xs font-bold text-slate-600 mb-1">CPF</label>
-          <input type="text" id="cadCPF" required placeholder="000.000.000-00" class="w-full p-2.5 border rounded-lg text-sm">
-        </div>
-        <div>
-          <label class="block text-xs font-bold text-slate-600 mb-1">E-mail</label>
-          <input type="email" id="cadEmail" required class="w-full p-2.5 border rounded-lg text-sm">
-        </div>
-        <div>
-          <label class="block text-xs font-bold text-slate-600 mb-1">Telefone</label>
-          <input type="text" id="cadTelefone" required placeholder="(81) 98888-8888" class="w-full p-2.5 border rounded-lg text-sm">
-        </div>
-        <div class="flex justify-end gap-2 pt-3">
-          <button type="button" onclick="fecharModalUsuario()" class="px-4 py-2 text-slate-600 text-sm">Cancelar</button>
-          <button type="submit" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-lg text-sm">Salvar</button>
-        </div>
-      </form>
-    </div>
-  </div>
+</div>
 
-  <!-- MODAL EMPRÉSTIMO -->
-  <div id="modalEmprestimo" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm hidden flex items-center justify-center p-4 z-50">
-    <div class="bg-white rounded-xl max-w-md w-full p-6 shadow-2xl">
-      <h3 class="text-lg font-bold text-indigo-900 mb-2">Confirmar Empréstimo</h3>
-      <p id="empLivroTitulo" class="text-sm font-semibold text-slate-700 mb-4 bg-indigo-50 p-3 rounded-lg"></p>
-      <div class="space-y-4">
-        <div>
-          <label class="block text-xs font-bold text-slate-600 mb-1">Selecione o Leitor</label>
-          <select id="empUsuarioSelect" class="w-full p-2.5 border rounded-lg text-sm bg-white" size="4"></select>
-        </div>
-        <div class="flex justify-end gap-2 pt-2">
-          <button type="button" onclick="fecharModalEmprestimo()" class="px-4 py-2 text-slate-600 text-sm">Cancelar</button>
-          <button type="button" onclick="confirmarEmprestimo()" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold rounded-lg text-sm">Confirmar</button>
-        </div>
+<div id="modalLivro" class="modal hidden">
+
+  <div class="modal-card">
+
+    <div class="modal-head">
+
+      <div>
+
+        <div class="eyebrow">Acervo</div>
+
+        <h3>Novo livro</h3>
+
       </div>
+
+      <button
+        class="close"
+        onclick="fecharModalLivro()">
+
+        <i data-lucide="x"></i>
+
+      </button>
+
     </div>
+
+    <form onsubmit="salvarLivro(event)">
+
+      <div class="form-grid">
+
+        <div class="field full-field">
+
+          <label>Título</label>
+
+          <input
+            id="livroTitulo"
+            required
+            placeholder="Ex.: Dom Casmurro">
+
+        </div>
+
+        <div class="field">
+
+          <label>Autor</label>
+
+          <input
+            id="livroAutor"
+            required
+            placeholder="Nome do autor">
+
+        </div>
+
+        <div class="field">
+
+          <label>ISBN</label>
+
+          <input
+            id="livroIsbn"
+            placeholder="978-...">
+
+        </div>
+
+        <div class="field">
+
+          <label>Quantidade</label>
+
+          <input
+            id="livroQtd"
+            type="number"
+            min="0"
+            value="1"
+            required>
+
+        </div>
+
+        <div class="field">
+
+          <label>URL da capa</label>
+
+          <input
+            id="livroCapa"
+            placeholder="https://...">
+
+        </div>
+
+      </div>
+
+      <div class="modal-actions">
+
+        <button
+          type="button"
+          class="secondary-btn"
+          onclick="fecharModalLivro()">
+
+          Cancelar
+
+        </button>
+
+        <button
+          class="primary-btn"
+          type="submit">
+
+          Salvar livro
+
+        </button>
+
+      </div>
+
+    </form>
+
   </div>
 
-  <!-- JAVASCRIPT -->
-  <script>
-    let livros = [
-      { id: 1, titulo: "Estruturas de Dados e Algoritmos com Python", autor: "Bruno R.", disponivel: 3, total: 5, genero: "Tecnologia" },
-      { id: 2, titulo: "Banco de Dados Relacionais e NoSQL", autor: "Carlos A.", disponivel: 1, total: 2, genero: "Engenharia" },
-      { id: 3, titulo: "Sistemas Distribuídos e Microsserviços", autor: "Mariana F.", disponivel: 0, total: 4, genero: "Tecnologia" },
-      { id: 4, titulo: "Clean Code: Código Limpo", autor: "Robert C. Martin", disponivel: 5, total: 5, genero: "Programação" }
-    ];
+</div>
 
-    let usuarios = [
-      { id: 1, nome: "Luis Victor", cpf: "123.456.789-00", email: "luis@email.com", telefone: "(81) 99999-1111" },
-      { id: 2, nome: "Ana Beatris", cpf: "987.654.321-11", email: "ana@email.com", telefone: "(81) 98888-2222" }
-    ];
+<div id="modalUsuario" class="modal hidden">
 
-    async function carregarUsuariosDoBanco() {
-  try {
-    const resposta = await fetch("/api/usuarios");
+  <div class="modal-card">
 
-    if (!resposta.ok) {
-      throw new Error("Erro ao buscar usuários do banco.");
-    }
+    <div class="modal-head">
 
-    const dados = await resposta.json();
+      <div>
 
-    usuarios = dados;
+        <div class="eyebrow">Cadastro</div>
 
-    renderizarUsuarios(usuarios);
+        <h3>Novo leitor</h3>
 
-    console.log("Usuários carregados do PostgreSQL:", usuarios);
+      </div>
 
-  } catch (erro) {
-    console.error("Erro:", erro);
-    alert("Não foi possível carregar os usuários do PostgreSQL.");
-  }
-}
+      <button
+        class="close"
+        onclick="fecharModalUsuario()">
 
-    let logs = [
-      { id: "65b_init", tipo_evento: "SISTEMA_INIT", detalhes: "Auditoria MongoDB iniciada.", id_usuario: null, id_livro: null, data: new Date().toLocaleTimeString() }
-    ];
+        <i data-lucide="x"></i>
 
-    let livroSelecionadoId = null;
+      </button>
 
-    async function carregarLivrosDoBanco() {
-    try {
-        const resposta = await fetch("/api/livros");
+    </div>
 
-        if (!resposta.ok) {
-            throw new Error("Erro ao buscar livros do banco.");
-        }
+    <form onsubmit="salvarUsuario(event)">
 
-        const dados = await resposta.json();
+      <div class="form-grid">
 
-        livros = dados;
+        <div class="field full-field">
 
-        renderizarLivros(livros);
+          <label>Nome completo</label>
 
-        console.log("Livros carregados do PostgreSQL:", livros);
+          <input
+            id="cadNome"
+            required
+            placeholder="Nome do leitor">
 
-    } catch (erro) {
-        console.error("Erro:", erro);
-        alert("Não foi possível carregar os livros do PostgreSQL.");
-    }
-}
+        </div>
 
-    document.addEventListener("DOMContentLoaded", async () => {
-    await carregarLivrosDoBanco();
-    await carregarUsuariosDoBanco();
+        <div class="field">
 
-    await carregarLogsDoBanco();
-    lucide.createIcons();
-});
+          <label>CPF</label>
 
-    function renderizarLivros(lista) {
-      const grid = document.getElementById("gridLivros");
-      const semRes = document.getElementById("semResultados");
-      grid.innerHTML = "";
-      if (lista.length === 0) { semRes.classList.remove("hidden"); return; }
-      semRes.classList.add("hidden");
+          <input
+            id="cadCPF"
+            maxlength="14"
+            inputmode="numeric"
+            oninput="aplicarMascaraCPF(this)"
+            placeholder="000.000.000-00">
 
-      lista.forEach(livro => {
-        const disponivel = livro.disponivel > 0;
-        grid.innerHTML += `
-          <div class="bg-white rounded-xl shadow-sm hover:shadow-md transition border border-slate-200 p-5 flex flex-col justify-between">
-            <div>
-              <div class="flex justify-between items-start mb-2">
-                <span class="text-[10px] font-bold uppercase px-2 py-0.5 rounded bg-slate-100 text-slate-600">ID #${livro.id}</span>
-                <span class="text-xs px-2 py-0.5 rounded-full font-semibold ${disponivel ? 'bg-emerald-100 text-emerald-700' : 'bg-rose-100 text-rose-700'}">
-                  ${disponivel ? `${livro.disponivel} disp.` : 'Esgotado'}
-                </span>
-              </div>
-              <h3 class="font-bold text-slate-800 text-base mb-1">${livro.titulo}</h3>
-              <p class="text-xs text-slate-500 mb-3">Autor: ${livro.autor}</p>
-            </div>
-            <button onclick="abrirModalEmprestimo(${livro.id})" ${!disponivel ? 'disabled' : ''} class="w-full py-2 px-3 rounded-lg text-xs font-bold transition flex items-center justify-center gap-2 ${disponivel ? 'bg-indigo-600 hover:bg-indigo-700 text-white' : 'bg-slate-200 text-slate-400 cursor-not-allowed'}">
-              Emprestar
-            </button>
-          </div>
-        `;
-      });
-      lucide.createIcons();
-    }
+        </div>
 
-    function filtrarLivros() {
-      const termo = document.getElementById("campoBusca").value.toLowerCase();
-      const filtrados = livros.filter(l => l.titulo.toLowerCase().includes(termo) || l.autor.toLowerCase().includes(termo) || l.id.toString() === termo);
-      renderizarLivros(filtrados);
-    }
+        <div class="field">
 
-    async function salvarUsuario(e) {
-  e.preventDefault();
+          <label>Telefone</label>
 
-  const novoU = {
-    nome: document.getElementById("cadNome").value,
-    cpf: document.getElementById("cadCPF").value,
-    email: document.getElementById("cadEmail").value,
-    telefone: document.getElementById("cadTelefone").value
-  };
+          <input
+            id="cadTelefone"
+            maxlength="15"
+            inputmode="numeric"
+            oninput="aplicarMascaraTelefone(this)"
+            placeholder="(00) 00000-0000">
 
-  try {
-    const resposta = await fetch("/api/usuarios", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify(novoU)
-    });
+        </div>
 
-    const dados = await resposta.json();
+        <div class="field full-field">
 
-    if (!resposta.ok) {
-      throw new Error(dados.erro || "Erro ao cadastrar usuário.");
-    }
+          <label>E-mail</label>
 
-    usuarios.push(dados);
+          <input
+            id="cadEmail"
+            type="email"
+            required
+            placeholder="leitor@email.com">
 
-    renderizarUsuarios(usuarios);
-    fecharModalUsuario();
-    e.target.reset();
+        </div>
 
-    alert("Leitor cadastrado com sucesso!");
+      </div>
 
-  } catch (erro) {
-    console.error("Erro:", erro);
-    alert("Não foi possível cadastrar o leitor: " + erro.message);
-  }
-}
+      <div class="modal-actions">
 
-    function renderizarUsuarios(lista) {
-      const tb = document.getElementById("tabelaUsuarios");
-      tb.innerHTML = "";
-      lista.forEach(u => {
-        tb.innerHTML += `
-          <tr class="border-b hover:bg-slate-50">
-            <td class="p-3 font-mono text-xs">#${u.id}</td>
-            <td class="p-3 font-semibold text-slate-700">${u.nome}</td>
-            <td class="p-3 text-slate-500">${u.cpf}</td>
-            <td class="p-3 text-slate-500">${u.email}</td>
-            <td class="p-3 text-slate-500">${u.telefone}</td>
-          </tr>
-        `;
-      });
-    }
+        <button
+          type="button"
+          class="secondary-btn"
+          onclick="fecharModalUsuario()">
 
-    function filtrarUsuarios() {
-      const termo = document.getElementById("buscaUsuarioInput").value.toLowerCase();
-      const filtrados = usuarios.filter(u => u.nome.toLowerCase().includes(termo) || u.cpf.includes(termo));
-      renderizarUsuarios(filtrados);
-    }
+          Cancelar
 
-    function abrirModalEmprestimo(idLivro) {
-      const livro = livros.find(l => l.id === idLivro);
-      livroSelecionadoId = idLivro;
-      document.getElementById("empLivroTitulo").innerText = `Livro: ${livro.titulo}`;
-      const select = document.getElementById("empUsuarioSelect");
-      select.innerHTML = "";
-      usuarios.forEach(u => { select.innerHTML += `<option value="${u.id}">${u.nome} (CPF: ${u.cpf})</option>`; });
-      document.getElementById("modalEmprestimo").classList.remove("hidden");
-    }
+        </button>
 
-    function fecharModalEmprestimo() { document.getElementById("modalEmprestimo").classList.add("hidden"); }
+        <button
+          class="primary-btn"
+          type="submit">
 
-    async function confirmarEmprestimo() {
-  const idUsuario = parseInt(document.getElementById("empUsuarioSelect").value);
-  const idLivro = livroSelecionadoId;
+          Salvar leitor
 
-  if (!idUsuario || !idLivro) {
-    alert("Selecione um usuário e um livro.");
-    return;
-  }
+        </button>
 
-  try {
-    const resposta = await fetch("/api/emprestimos", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({
-        id_usuario: idUsuario,
-        id_livro: idLivro
-      })
-    });
+      </div>
 
-    const dados = await resposta.json();
+    </form>
 
-    if (!resposta.ok) {
-      throw new Error(dados.erro || "Erro ao realizar empréstimo.");
-    }
+  </div>
 
-    await carregarLivrosDoBanco();
+</div>
 
-    fecharModalEmprestimo();
+<script src="{{ url_for('static', filename='js/app.js') }}"></script>
 
-    alert("Empréstimo realizado com sucesso!");
-
-  } catch (erro) {
-    console.error("Erro:", erro);
-    alert("Não foi possível realizar o empréstimo: " + erro.message);
-  }
-}
-
-    async function carregarLogsDoBanco() {
-  try {
-    const resposta = await fetch("/api/logs");
-    const dados = await resposta.json();
-
-    logs = dados.map(log => ({
-      id: 'mongo_' + Math.random().toString(16).substr(2, 6),
-      tipo_evento: log.tipo_evento,
-      detalhes: log.detalhes,
-      id_usuario: log.id_usuario,
-      id_livro: log.id_livro,
-      data: log.timestamp
-        ? new Date(log.timestamp).toLocaleString("pt-BR")
-        : "Sem data"
-    }));
-
-    renderizarLogs();
-
-  } catch (erro) {
-    console.error("Erro ao carregar logs do MongoDB:", erro);
-  }
-}
-
-    function renderizarLogs() {
-      const container = document.getElementById("containerLogs");
-      container.innerHTML = "";
-      logs.forEach(log => {
-        container.innerHTML += `
-          <div class="border-l-2 border-emerald-500 pl-3 py-1 bg-slate-800/40 rounded-r">
-            <div class="text-[10px] text-slate-400 flex justify-between">
-              <span class="text-emerald-400 font-bold">${log.tipo_evento}</span>
-              <span>${log.data}</span>
-            </div>
-            <p class="text-xs text-slate-200 mt-1">${log.detalhes}</p>
-            <div class="text-[10px] text-slate-500 mt-0.5">id_usuario: ${log.id_usuario || 'null'} | id_livro: ${log.id_livro || 'null'}</div>
-          </div>
-        `;
-      });
-    }
-
-    function alternarAba(aba) {
-      document.getElementById("sec-catalogo").classList.add("hidden");
-      document.getElementById("sec-usuarios").classList.add("hidden");
-      document.getElementById("sec-logs").classList.add("hidden");
-
-      document.getElementById("tab-catalogo").className = "pb-2 border-b-2 border-transparent text-slate-500 hover:text-indigo-600 text-sm flex items-center gap-2";
-      document.getElementById("tab-usuarios").className = "pb-2 border-b-2 border-transparent text-slate-500 hover:text-indigo-600 text-sm flex items-center gap-2";
-      document.getElementById("tab-logs").className = "pb-2 border-b-2 border-transparent text-slate-500 hover:text-indigo-600 text-sm flex items-center gap-2";
-
-      document.getElementById(`sec-${aba}`).classList.remove("hidden");
-      document.getElementById(`tab-${aba}`).className = "pb-2 border-b-2 border-indigo-600 font-bold text-indigo-600 text-sm flex items-center gap-2";
-    }
-
-    function abrirModalUsuario() { document.getElementById("modalUsuario").classList.remove("hidden"); }
-    function fecharModalUsuario() { document.getElementById("modalUsuario").classList.add("hidden"); }
-  </script>
 </body>
 </html>
